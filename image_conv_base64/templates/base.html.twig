@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        {% block stylesheets %}{% endblock %}
+        <style>
+            body{
+                font-family: impact;
+                background-color:black;
+                color:white;
+            }
+            input{
+                padding:15px;
+                font-size:25px;
+                border-radius:10px;
+                outline:none;
+            }
+            
+        </style>
+    </head>
+    <body>
+        {% block body %}
+            <h1 align="center">Retornar BASE64 da IMG</h1>
+            <form action="/route_post" method="post" enctype="multipart/form-data">
+                <input type="file" name="imagem" value="">
+                <input type="submit">
+            </form>
+            <h2>Prevew em Base64</h2>
+            <img id="preview" width="500" height="500">
+            <h2>Imagem com retorno em base 64</h2>
+            <img id="base64" width="500" height="500">
+            <script type="text/javascript">
+                let reader = new FileReader();
+                document.querySelector("[name=imagem]").addEventListener("change", (e)=>{
+                    let content = e.target.files[0];
+                    reader.readAsDataURL(content);
+                    reader.onloadend = ()=>{
+                        document.querySelector('#preview').src = reader.result;
+                    }
+                });
+                document.addEventListener('submit', async(e)=>{
+                    e.preventDefault();
+                    let form = document.querySelector('form');
+                    let form_data = new FormData(form);
+                    let url = "/route_post";
+                    let header = new Headers();
+                    let unit = {
+                        method: 'POST',
+                        headers: header,
+                        body: form_data,
+                        mode: 'cors'
+                    };
+                    let req = new Request(url, unit);
+                    let res = await fetch(req);
+                    if(res.ok){
+                        let json = await res.json();
+                        document.querySelector("#base64").src = `${json}`;
+                    }
+                });
+            </script>
+        {% endblock %}
+    </body>
+</html>
